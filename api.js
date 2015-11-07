@@ -51,14 +51,16 @@ api.get('/companies', (req, res) => {
  */
 api.get('/companies/:id', (req, res) => {
     const id = req.params.id;
+    console.log('id: ', id);
     models.Company.findOne({ _id : id }, (err, docs) => {
         if(err) {
+            console.log('err:', err);
             res.status(500).send(err.name);
         } else if(!docs) {
             res.status(404).send(NOT_FOUND_ERROR_MESSAGE);
         } else {
             console.log(docs);
-            res.status(200).send(docs);
+            res.status(200).send(docs.map((val) => { val.created = undefined; return val; }));
         }
     });
 });
