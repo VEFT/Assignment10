@@ -1,7 +1,6 @@
 'use strict';
 
 const express = require('express');
-const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const api = require('./api');
 const port = 400;
