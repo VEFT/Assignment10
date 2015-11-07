@@ -51,10 +51,8 @@ api.get('/companies', (req, res) => {
  */
 api.get('/companies/:id', (req, res) => {
     const id = req.params.id;
-    console.log('id: ', id);
     models.Company.findOne({ _id : id }, (err, doc) => {
         if(err) {
-            console.log('err:', err);
             res.status(500).send(err.name);
         } else if(!doc) {
             res.status(404).send(NOT_FOUND_ERROR_MESSAGE);
