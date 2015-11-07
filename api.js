@@ -132,9 +132,6 @@ api.post('/companies', bodyParser.json(), (req, res) => {
  */
 api.post('/companies/:id', bodyParser.json(), (req, res) => {
     const id = req.params.id;
-    //var update_company = req.body;
-    //var company = null;
-    console.log('id: ', id);
 
     // Finding the company with given id.
     models.Company.findOne({ _id : id }, (err, docs) => {
@@ -143,20 +140,13 @@ api.post('/companies/:id', bodyParser.json(), (req, res) => {
         } else if(!docs) {
             res.status(404).send(NOT_FOUND_ERROR_MESSAGE);
         } else {
-            //company = docs;
-            //console.log('company:', company);
-            //console.log('update_company:', update_company);
-            console.log('dDSDFASSD:', docs);
             docs.title = req.body.title;
             docs.description = req.body.description;
             docs.url = req.body.url;
-            console.log('dDSDFASSD:', docs);
 
             // Updating the object.
-            //models.Company.update({ _id: company._id }, { runValidators: true }, update_company, (err) => {
             docs.save(function(err) {
                 if(err) {
-                    console.log('THE ERROR:', err);
                     if(err.name === VALIDATION_ERROR_NAME) {
                         res.status(412).send(err.name);
                     } else {
@@ -177,7 +167,6 @@ api.post('/companies/:id', bodyParser.json(), (req, res) => {
                     });
 
                     promise.then((es_doc) => {
-                        console.log('inside promise!!');
                         res.status(200).send(es_doc._id);
                     }, (es_err) => {
                         res.status(500).send(es_err);
@@ -187,8 +176,6 @@ api.post('/companies/:id', bodyParser.json(), (req, res) => {
             });
         }
     });
-
-
 });
 
 /*
