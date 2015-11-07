@@ -63,7 +63,7 @@ api.get('/companies/:id', (req, res) => {
     });
 });
 
-/* Allows administrators to add new companies to MongoDB.
+/* Allows administrators to add new companies to MongoDB and ElasticSearch.
  * The company is posted with a POST method and the data sent as a JSON object
  * within the request body.
  * This endpoint is authenticated using the ADMIN_TOKEN header.
