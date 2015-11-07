@@ -2,6 +2,8 @@ node_modules
 journal
 local.0
 local.ns
+app.0
+app.ns
 mongod.lock
 storage.bson
 assignment10.*

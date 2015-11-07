@@ -72,6 +72,7 @@ api.get('/companies/:id', (req, res) => {
  */
 api.post('/companies', bodyParser.json(), (req, res) => {
     const token = req.header('ADMIN_TOKEN');
+    console.log('token:', token);
     var requestType = req.get('Content-Type');
 
     const name = req.body.title;
@@ -80,10 +81,10 @@ api.post('/companies', bodyParser.json(), (req, res) => {
     const created = new Date();
 
     const data = {
-        "title": name,
-        "description": description,
-        "url": url,
-        "created": created
+        'title': name,
+        'description': description,
+        'url': url,
+        'created': created
     };
 
     models.Company.findOne({ title : name }, (err, docs) => {
@@ -99,6 +100,7 @@ api.post('/companies', bodyParser.json(), (req, res) => {
             } else {
                 const c = new models.Company(req.body);
                 c.save(function(save_err, save_doc) {
+                    console.log(save_doc);
                     if (save_err) {
                         if(err.name === VALIDATION_ERROR_NAME) {
                             res.status(412).send(err.name);
@@ -110,16 +112,17 @@ api.post('/companies', bodyParser.json(), (req, res) => {
                         const promise = client.index({
                             'index': 'companies',
                             'type': 'company',
-                            'id': c._id,
+                            'id': c._id.toString(),
                             'body': data
                         });
                         promise.then((es_doc) => {
-                            res.status(201).send(es.docs.map((val) => { return val._id; });
+                            console.log('doc: ', es_doc);
+                            res.status(201).send(es_doc._id);
                         }, (es_err) => {
                             res.status(500).send(es_err);
                         });
                     }
-                })
+                });
             }
         }
     });
