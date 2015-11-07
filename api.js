@@ -5,11 +5,13 @@ const bodyParser = require('body-parser');
 const elasticsearch = require('elasticsearch');
 const models = require('./models');
 const api = express();
-const ADMIN_TOKEN = "admintoken";
-const VALIDATION_ERROR_NAME = "ValidationError";
-const NOT_FOUND_ERROR_MESSAGE = "NotFound";
-const UNAUTHORIZED_ERROR_MESSAGE = "Unauthorized";
-const CONFLICT_ERROR_MESSAGE = "Conflict";
+const ADMIN_TOKEN = 'admintoken';
+const VALIDATION_ERROR_NAME = 'ValidationError';
+const NOT_FOUND_ERROR_MESSAGE = 'NotFound';
+const UNAUTHORIZED_ERROR_MESSAGE = 'Unauthorized';
+const CONFLICT_ERROR_MESSAGE = 'Conflict';
+const UNSUPPORTED_MEDIA_TYPE_ERROR_MESSAGE = 'UnsupportedMediaType';
+const APPLICATION_JSON = 'application/json';
 
 const client = new elasticsearch.Client({
     host: 'localhost:9200',
@@ -55,7 +57,8 @@ api.get('/companies/:id', (req, res) => {
  * This endpoint is authenticated using the ADMIN_TOKEN header.
  */
 api.post('/companies', bodyParser.json(), (req, res) => {
-    const token = req.header("ADMIN_TOKEN");
+    const token = req.header('ADMIN_TOKEN');
+    var requestType = req.get('Content-Type');
     if(!token || token !== ADMIN_TOKEN) {
         res.status(401).send(UNAUTHORIZED_ERROR_MESSAGE);
     } else {
@@ -68,7 +71,12 @@ api.post('/companies', bodyParser.json(), (req, res) => {
                     res.status(500).send(err.name);
                 }
             } else {
-                res.status(201).send({ company_id: c._id});
+                if(!requestType || requestType !== APPLICATION_JSON) {
+                    res.status(415).send(UNSUPPORTED_MEDIA_TYPE_ERROR_MESSAGE);
+                }
+                else {
+                    res.status(201).send({ company_id: c._id});
+                }
             }
         })
     }
