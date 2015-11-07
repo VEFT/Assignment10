@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/VEFT/Assignment10/issues"
   },
-  "homepage": "https://github.com/VEFT/Assignment10#readme"
+  "homepage": "https://github.com/VEFT/Assignment10#readme",
+  "dependencies": {
+    "body-parser": "^1.14.1",
+    "elasticsearch": "^9.0.0"
+  }
 }
