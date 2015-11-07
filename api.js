@@ -33,7 +33,7 @@ api.get('/companies', (req, res) => {
     });
 
     promise.then((doc) => {
-        res.status(200).send(doc);
+        res.status(200).send(doc.map((val) => { val.created = undefined; return val; }));
     }, (err) => {
         res.status(500).send(err);
     });
