@@ -29,7 +29,8 @@ api.get('/companies', (req, res) => {
         'index': 'companies',
         'type': 'company',
         'size': max,
-        'from': page
+        'from': page,
+        'sort': 'title'
     });
 
     promise.then((doc) => {
