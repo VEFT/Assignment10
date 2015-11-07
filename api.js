@@ -236,7 +236,8 @@ api.delete('/companies/:id', (req, res) => {
 
 /* Rassgat
  */
-api.post('/companies/search', (req, res) => {
+//api.post('/companies/:id', bodyParser.json(), (req, res) => {
+api.post('/companies/search', bodyParser.json(), (req, res) => {
     console.log('flot');
     const search_string = req.body.search;
     console.log('searchstring:', search_string);
