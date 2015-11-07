@@ -73,25 +73,57 @@ api.get('/companies/:id', (req, res) => {
 api.post('/companies', bodyParser.json(), (req, res) => {
     const token = req.header('ADMIN_TOKEN');
     var requestType = req.get('Content-Type');
-    if(!token || token !== ADMIN_TOKEN) {
-        res.status(401).send(UNAUTHORIZED_ERROR_MESSAGE);
-    } else if(!requestType || requestType !== APPLICATION_JSON) {
-        res.status(415).send(UNSUPPORTED_MEDIA_TYPE_ERROR_MESSAGE);
-    } else {
-        const c = new models.Company(req.body);
-        c.save(function(err, doc) {
-            if (err) {
-                if(err.name === VALIDATION_ERROR_NAME) {
-                    res.status(412).send(err.name);
-                } else {
-                    res.status(500).send(err.name);
-                }
+
+    const name = req.body.title;
+    const description = req.body.description;
+    const url = req.body.url;
+    const created = new Date();
+
+    const data = {
+        "title": name,
+        "description": description,
+        "url": url,
+        "created": created
+    };
+
+
+    models.Company.findOne({ title : name }, (err, docs) => {
+        if(err) {
+            res.status(500).send(err.name);
+        } else if (docs) {
+            res.status(409).send(CONFLICT_ERROR_MESSAGE);
+        } else {
+            if(!token || token !== ADMIN_TOKEN) {
+                res.status(401).send(UNAUTHORIZED_ERROR_MESSAGE);
+            } else if(!requestType || requestType !== APPLICATION_JSON) {
+                res.status(415).send(UNSUPPORTED_MEDIA_TYPE_ERROR_MESSAGE);
+            } else {
+                const c = new models.Company(req.body);
+                c.save(function(save_err, save_doc) {
+                    if (save_err) {
+                        if(err.name === VALIDATION_ERROR_NAME) {
+                            res.status(412).send(err.name);
+                        } else {
+                            res.status(500).send(err.name);
+                        }
+                    }
+                    else {
+                        const promise = client.index({
+                            'index': 'companies',
+                            'type': 'company',
+                            'id': c._id,
+                            'body': data
+                        });
+                        promise.then((es_doc) => {
+                            res.status(201).send(es_docs);
+                        }, (es_err) => {
+                            res.status(500).send(es_err);
+                        });
+                    }
+                })
             }
-            else {
-                res.status(201).send({ company_id: c._id});
-            }
-        })
-    }
+        }
+    });
 });
 
 module.exports = api;
