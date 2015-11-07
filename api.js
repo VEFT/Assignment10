@@ -34,7 +34,9 @@ api.get('/companies', (req, res) => {
         'type': 'company',
         'size': max,
         'from': page
-         //'sort': { 'title': { 'order': 'desc' }}
+        //'sort': { 'title' : 'asc' }
+        //'sort': { 'title': { 'order': 'desc' }}
+        //'sort': 'title'
     });
 
     promise.then((doc) => {
@@ -70,7 +72,7 @@ api.get('/companies/:id', (req, res) => {
  */
 api.post('/companies', bodyParser.json(), (req, res) => {
     const token = req.header('ADMIN_TOKEN');
-    var requestType = req.get('Content-Type');
+    const requestType = req.get('Content-Type');
 
     const name = req.body.title;
     const description = req.body.description;
@@ -131,6 +133,8 @@ api.post('/companies', bodyParser.json(), (req, res) => {
  * With the preconditions are not met then 412 error is returned.
  */
 api.post('/companies/:id', bodyParser.json(), (req, res) => {
+    const token = req.header('ADMIN_TOKEN');
+    const requestType = req.get('Content-Type');
     const id = req.params.id;
 
     // Finding the company with given id.
@@ -140,40 +144,46 @@ api.post('/companies/:id', bodyParser.json(), (req, res) => {
         } else if(!docs) {
             res.status(404).send(NOT_FOUND_ERROR_MESSAGE);
         } else {
-            docs.title = req.body.title;
-            docs.description = req.body.description;
-            docs.url = req.body.url;
+            if(!token || token !== ADMIN_TOKEN) {
+                res.status(401).send(UNAUTHORIZED_ERROR_MESSAGE);
+            } else if(!requestType || requestType !== APPLICATION_JSON) {
+                res.status(415).send(UNSUPPORTED_MEDIA_TYPE_ERROR_MESSAGE);
+            } else {
+                docs.title = req.body.title;
+                docs.description = req.body.description;
+                docs.url = req.body.url;
 
-            // Updating the object.
-            docs.save(function(err) {
-                if(err) {
-                    if(err.name === VALIDATION_ERROR_NAME) {
-                        res.status(412).send(err.name);
+                // Updating the object.
+                docs.save(function(err) {
+                    if(err) {
+                        if(err.name === VALIDATION_ERROR_NAME) {
+                            res.status(412).send(err.name);
+                        } else {
+                            res.status(500).send(err.name);
+                        }
                     } else {
-                        res.status(500).send(err.name);
+                        const data = {
+                            'title': docs.title,
+                            'description': docs.description,
+                            'url': docs.url
+                        };
+
+                        const promise = client.index({
+                            'index': 'companies',
+                            'type': 'company',
+                            'id': docs._id.toString(),
+                            'body': data
+                        });
+
+                        promise.then((es_doc) => {
+                            res.status(200).send(es_doc._id);
+                        }, (es_err) => {
+                            res.status(500).send(es_err);
+                        });
+
                     }
-                } else {
-                    const data = {
-                        'title': docs.title,
-                        'description': docs.description,
-                        'url': docs.url
-                    };
-
-                    const promise = client.index({
-                        'index': 'companies',
-                        'type': 'company',
-                        'id': docs._id.toString(),
-                        'body': data
-                    });
-
-                    promise.then((es_doc) => {
-                        res.status(200).send(es_doc._id);
-                    }, (es_err) => {
-                        res.status(500).send(es_err);
-                    });
-
-                }
-            });
+                });
+            }
         }
     });
 });
@@ -186,7 +196,7 @@ api.post('/companies/:id', bodyParser.json(), (req, res) => {
  */
 api.delete('/companies/:id', (req, res) => {
     const token = req.header('ADMIN_TOKEN');
-    var requestType = req.get('Content-Type');
+    const requestType = req.get('Content-Type');
     const id = req.params.id;
     console.log('id:', id);
 
@@ -219,10 +229,34 @@ api.delete('/companies/:id', (req, res) => {
                         });
                     }
                 });
-
-
             }
         }
+    });
+});
+
+/* Rassgat
+ */
+api.post('/companies/search', (req, res) => {
+    console.log('flot');
+    const search_string = req.body.search;
+    console.log('searchstring:', search_string);
+
+    const promise = client.search({
+        'index': 'companies',
+        'type': 'company',
+        'bool': {
+            'should': {
+                'title': search_string,
+                'description': search_string,
+                'url': search_string
+            }
+        }
+    });
+
+    promise.then((doc) => {
+        res.status(200).send(doc.hits.hits.map((val) => { val._source.created = undefined; return val; }));
+    }, (err) => {
+        res.status(500).send(err.name);
     });
 });
 
