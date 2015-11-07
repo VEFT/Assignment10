@@ -70,7 +70,6 @@ api.get('/companies/:id', (req, res) => {
  */
 api.post('/companies', bodyParser.json(), (req, res) => {
     const token = req.header('ADMIN_TOKEN');
-    console.log('token:', token);
     var requestType = req.get('Content-Type');
 
     const name = req.body.title;
@@ -190,6 +189,42 @@ api.post('/companies/:id', bodyParser.json(), (req, res) => {
     });
 
 
+});
+
+/*
+ * This route is used to remove a previously added company.
+ * All the preconditions from POST /companies also apply for this route.
+ * If no company is found by the :id the route responds with status code 404.
+ * The company document is deleted from both MongoDB and ElasticSearch.
+ */
+api.delete('/companies/:id', (req, res) => {
+    const token = req.header('ADMIN_TOKEN');
+    var requestType = req.get('Content-Type'); //A thetta vid med DELETE?
+    const id = req.params.is;
+
+    models.Company.findOne({ _id : id }, (err, docs) => {
+        if(err) {
+            res.status(500).send(err.name);
+        } else if (!docs) {
+            res.status(404).send(NOT_FOUND_ERROR_MESSAGE);
+        } else {
+            if(!token || token !== ADMIN_TOKEN) {
+                res.status(401).send(UNAUTHORIZED_ERROR_MESSAGE);
+            } else if(!requestType || requestType !== APPLICATION_JSON) {
+                res.status(415).send(UNSUPPORTED_MEDIA_TYPE_ERROR_MESSAGE);
+            } else {
+                client.delete({
+                    index: 'companies',
+                    type: 'company',
+                    id: req.params.id
+                }, function (es_err, es_docs) {
+                    if(es_err) {
+                        res.status(500).send(es_err.name);
+                    }
+                });
+            }
+        }
+    }).remove( callback );
 });
 
 module.exports = api;
