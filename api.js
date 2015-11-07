@@ -186,8 +186,9 @@ api.post('/companies/:id', bodyParser.json(), (req, res) => {
  */
 api.delete('/companies/:id', (req, res) => {
     const token = req.header('ADMIN_TOKEN');
-    var requestType = req.get('Content-Type'); //A thetta vid med DELETE?
-    const id = req.params.is;
+    var requestType = req.get('Content-Type');
+    const id = req.params.id;
+    console.log('id:', id);
 
     models.Company.findOne({ _id : id }, (err, docs) => {
         if(err) {
@@ -200,18 +201,29 @@ api.delete('/companies/:id', (req, res) => {
             } else if(!requestType || requestType !== APPLICATION_JSON) {
                 res.status(415).send(UNSUPPORTED_MEDIA_TYPE_ERROR_MESSAGE);
             } else {
-                client.delete({
-                    index: 'companies',
-                    type: 'company',
-                    id: req.params.id
-                }, function (es_err, es_docs) {
-                    if(es_err) {
-                        res.status(500).send(es_err.name);
+
+                models.Company.remove({ _id: id }, function(err) {
+                    if(err) {
+                        res.status(500).send(err.name);
+                    } else {
+                        client.delete({
+                            index: 'companies',
+                            type: 'company',
+                            id: id
+                        }, function (es_err) {
+                            if(es_err) {
+                                res.status(500).send(es_err.name);
+                            } else {
+                                res.status(204).send(id);
+                            }
+                        });
                     }
                 });
+
+
             }
         }
-    }).remove( callback );
+    });
 });
 
 module.exports = api;
