@@ -2,6 +2,7 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
+const elasticSearch = require('elasticsearch');
 const models = require('./models');
 const api = express();
 const ADMIN_TOKEN = "admintoken";
@@ -9,6 +10,11 @@ const VALIDATION_ERROR_NAME = "ValidationError";
 const NOT_FOUND_ERROR_MESSAGE = "NotFound";
 const UNAUTHORIZED_ERROR_MESSAGE = "Unauthorized";
 const CONFLICT_ERROR_MESSAGE = "Conflict";
+
+const client = new elasticsearch.Client({
+    host: 'localhost:9200',
+    log: 'error'
+});
 
 /* Fetches a list of companies that have been added to MongoDB.
  * This endpoint uses no authentication.
