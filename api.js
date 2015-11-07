@@ -132,8 +132,8 @@ api.post('/companies', bodyParser.json(), (req, res) => {
  */
 api.post('/companies/:id', bodyParser.json(), (req, res) => {
     const id = req.params.id;
-    var update_company = req.body;
-    var company = null;
+    //var update_company = req.body;
+    //var company = null;
     console.log('id: ', id);
 
     // Finding the company with given id.
@@ -143,30 +143,36 @@ api.post('/companies/:id', bodyParser.json(), (req, res) => {
         } else if(!docs) {
             res.status(404).send(NOT_FOUND_ERROR_MESSAGE);
         } else {
-            company = docs;
-            console.log('company:', company);
-            console.log('update_company:', update_company);
+            //company = docs;
+            //console.log('company:', company);
+            //console.log('update_company:', update_company);
+            console.log('dDSDFASSD:', docs);
+            docs.title = req.body.title;
+            docs.description = req.body.description;
+            docs.url = req.body.url;
+            console.log('dDSDFASSD:', docs);
 
             // Updating the object.
-            models.Company.update({ _id: company._id }, update_company, (err) => {
+            //models.Company.update({ _id: company._id }, { runValidators: true }, update_company, (err) => {
+            docs.save(function(err) {
                 if(err) {
+                    console.log('THE ERROR:', err);
                     if(err.name === VALIDATION_ERROR_NAME) {
                         res.status(412).send(err.name);
                     } else {
-                        console.log('THE ERROR:', err);
                         res.status(500).send(err.name);
                     }
                 } else {
                     const data = {
-                        'title': update_company.title,
-                        'description': update_company.description,
-                        'url': update_company.url
+                        'title': docs.title,
+                        'description': docs.description,
+                        'url': docs.url
                     };
 
                     const promise = client.index({
                         'index': 'companies',
                         'type': 'company',
-                        'id': company._id.toString(),
+                        'id': docs._id.toString(),
                         'body': data
                     });
 
