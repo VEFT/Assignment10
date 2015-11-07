@@ -24,6 +24,8 @@ const client = new elasticsearch.Client({
 api.get('/companies', (req, res) => {
     const page = req.query.page || 0;
     const max = req.query.max || 20;
+    console.log('page:', page);
+    console.log('max:', max);
 
     const promise = client.search({
         'index': 'companies',
