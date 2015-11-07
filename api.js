@@ -14,12 +14,12 @@ const UNSUPPORTED_MEDIA_TYPE_ERROR_MESSAGE = 'UnsupportedMediaType';
 const APPLICATION_JSON = 'application/json';
 
 const client = new elasticsearch.Client({
-    host: 'localhost:4000',
+    host: 'localhost:9200',
     log: 'error'
 });
 
-/* Fetches a list of companies that have been added to MongoDB and 
- * elasticsearch. It uses elasticsearch to fetch the data.
+/* Fetches a list of companies that have been added to MongoDB and
+ * ElasticSearch. It uses ElasticSearch to fetch the data.
  * This endpoint uses no authentication.
  * If no company has been added this endpoint returns an empty list.
  */
@@ -33,12 +33,12 @@ api.get('/companies', (req, res) => {
         'index': 'companies',
         'type': 'company',
         'size': max,
-        'from': page,
-        'sort': 'title'
+        'from': page
+         //'sort': { 'title': { 'order': 'desc' }}
     });
 
     promise.then((doc) => {
-        res.status(200).send(doc.map((val) => { val.created = undefined; return val; }));
+        res.status(200).send(doc.hits.hits.map((val) => { val.created = undefined; return val; }));
     }, (err) => {
         res.status(500).send(err);
     });
