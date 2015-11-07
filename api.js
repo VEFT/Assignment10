@@ -14,7 +14,7 @@ const UNSUPPORTED_MEDIA_TYPE_ERROR_MESSAGE = 'UnsupportedMediaType';
 const APPLICATION_JSON = 'application/json';
 
 const client = new elasticsearch.Client({
-    host: 'localhost:9200',
+    host: 'localhost:4000',
     log: 'error'
 });
 
