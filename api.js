@@ -86,7 +86,6 @@ api.post('/companies', bodyParser.json(), (req, res) => {
         "created": created
     };
 
-
     models.Company.findOne({ title : name }, (err, docs) => {
         if(err) {
             res.status(500).send(err.name);
@@ -115,7 +114,7 @@ api.post('/companies', bodyParser.json(), (req, res) => {
                             'body': data
                         });
                         promise.then((es_doc) => {
-                            res.status(201).send(es_docs);
+                            res.status(201).send(es.docs.map((val) => { return val._id; });
                         }, (es_err) => {
                             res.status(500).send(es_err);
                         });
