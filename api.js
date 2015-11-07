@@ -96,4 +96,23 @@ api.post('/companies', bodyParser.json(), (req, res) => {
     }
 });
 
+/*
+ */
+api.post('/companies/:id', bodyParser.json(), (req, res) => {
+    const id = req.params.id;
+    var company = null;
+    console.log('id: ', id);
+    models.Company.findOne({ _id : id }, (err, docs) => {
+        if(err) {
+            res.status(500).send(err.name);
+        } else if(!docs) {
+            res.status(404).send(NOT_FOUND_ERROR_MESSAGE);
+        } else {
+            //res.status(200).send(docs.map((val) => { val.created = undefined; return val; }));
+            company = docs;
+        }
+    });
+    // TODO
+});
+
 module.exports = api;
