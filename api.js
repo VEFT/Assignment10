@@ -2,7 +2,7 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const elasticSearch = require('elasticsearch');
+const elasticsearch = require('elasticsearch');
 const models = require('./models');
 const api = express();
 const ADMIN_TOKEN = "admintoken";
