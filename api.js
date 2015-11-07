@@ -126,4 +126,41 @@ api.post('/companies', bodyParser.json(), (req, res) => {
     });
 });
 
+/* Method that takes id as a parameter and updates the company with
+ * the given id. The company object is passed in the request body.
+ * If the company is not found a 404 status code is returned.
+ * With the preconditions are not met then 412 error is returned.
+ */
+api.post('/companies/:id', bodyParser.json(), (req, res) => {
+    const id = req.params.id;
+    var update_company = req.body;
+    var company = null;
+    console.log('id: ', id);
+
+    // Finding the company with given id.
+    models.Company.findOne({ _id : id }, (err, docs) => {
+        if(err) {
+            res.status(500).send(err.name);
+        } else if(!docs) {
+            res.status(404).send(NOT_FOUND_ERROR_MESSAGE);
+        } else {
+            company = docs.toObject();
+        }
+    });
+
+    // Updating the object.
+    models.Company.update({ _id: company._id }, update_company, (err, doc) => {
+        if(err) {
+            if(err.name === VALIDATION_ERROR_NAME) {
+                res.status(412).send(err.name);
+            } else {
+                res.status(500).send(err.name);
+            }
+        } else {
+            // TODO corresponding ElasticSearch document must be re-indexed.
+            res.status(204).send(doc);
+        }
+    });
+});
+
 module.exports = api;
