@@ -73,6 +73,8 @@ api.post('/companies', bodyParser.json(), (req, res) => {
     var requestType = req.get('Content-Type');
     if(!token || token !== ADMIN_TOKEN) {
         res.status(401).send(UNAUTHORIZED_ERROR_MESSAGE);
+    } else if(!requestType || requestType !== APPLICATION_JSON) {
+        res.status(415).send(UNSUPPORTED_MEDIA_TYPE_ERROR_MESSAGE);
     } else {
         const c = new models.Company(req.body);
         c.save(function(err, doc) {
@@ -82,13 +84,9 @@ api.post('/companies', bodyParser.json(), (req, res) => {
                 } else {
                     res.status(500).send(err.name);
                 }
-            } else {
-                if(!requestType || requestType !== APPLICATION_JSON) {
-                    res.status(415).send(UNSUPPORTED_MEDIA_TYPE_ERROR_MESSAGE);
-                }
-                else {
-                    res.status(201).send({ company_id: c._id});
-                }
+            }
+            else {
+                res.status(201).send({ company_id: c._id});
             }
         })
     }
