@@ -100,10 +100,10 @@ api.post('/companies', bodyParser.json(), (req, res) => {
                 c.save(function(save_err, save_doc) {
                     console.log(save_doc);
                     if (save_err) {
-                        if(err.name === VALIDATION_ERROR_NAME) {
-                            res.status(412).send(err.name);
+                        if(save_err.name === VALIDATION_ERROR_NAME) {
+                            res.status(412).send(save_err.name);
                         } else {
-                            res.status(500).send(err.name);
+                            res.status(500).send(save_err.name);
                         }
                     }
                     else {
@@ -144,23 +144,46 @@ api.post('/companies/:id', bodyParser.json(), (req, res) => {
         } else if(!docs) {
             res.status(404).send(NOT_FOUND_ERROR_MESSAGE);
         } else {
-            company = docs.toObject();
+            company = docs;
+            console.log('company:', company);
+            console.log('update_company:', update_company);
+
+            // Updating the object.
+            models.Company.update({ _id: company._id }, update_company, (err) => {
+                if(err) {
+                    if(err.name === VALIDATION_ERROR_NAME) {
+                        res.status(412).send(err.name);
+                    } else {
+                        console.log('THE ERROR:', err);
+                        res.status(500).send(err.name);
+                    }
+                } else {
+                    const data = {
+                        'title': update_company.title,
+                        'description': update_company.description,
+                        'url': update_company.url
+                    };
+
+                    const promise = client.index({
+                        'index': 'companies',
+                        'type': 'company',
+                        'id': company._id.toString(),
+                        'body': data
+                    });
+
+                    promise.then((es_doc) => {
+                        console.log('inside promise!!');
+                        res.status(200).send(es_doc._id);
+                    }, (es_err) => {
+                        res.status(500).send(es_err);
+                    });
+
+                }
+            });
         }
     });
 
-    // Updating the object.
-    models.Company.update({ _id: company._id }, update_company, (err, doc) => {
-        if(err) {
-            if(err.name === VALIDATION_ERROR_NAME) {
-                res.status(412).send(err.name);
-            } else {
-                res.status(500).send(err.name);
-            }
-        } else {
-            // TODO corresponding ElasticSearch document must be re-indexed.
-            res.status(204).send(doc);
-        }
-    });
+
 });
 
 module.exports = api;
