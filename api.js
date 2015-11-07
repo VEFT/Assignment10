@@ -16,17 +16,26 @@ const client = new elasticsearch.Client({
     log: 'error'
 });
 
-/* Fetches a list of companies that have been added to MongoDB.
+/* Fetches a list of companies that have been added to MongoDB and 
+ * elasticsearch. It uses elasticsearch to fetch the data.
  * This endpoint uses no authentication.
  * If no company has been added this endpoint returns an empty list.
  */
 api.get('/companies', (req, res) => {
-    models.Company.find({}, (err, docs) => {
-        if(err) {
-            res.status(500).send(err.name);
-        } else {
-            res.status(200).send(docs);
-        }
+    const page = req.query.page || 0;
+    const max = req.query.max || 20;
+
+    const promise = client.search({
+        'index': 'companies',
+        'type': 'company',
+        'size': max,
+        'from': page
+    });
+
+    promise.then((doc) => {
+        res.status(200).send(doc);
+    }, (err) => {
+        res.status(500).send(err);
     });
 });
 
