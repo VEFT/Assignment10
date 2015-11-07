@@ -1,0 +1,19 @@
+{
+  "name": "assignment10",
+  "version": "1.0.0",
+  "description": "final project in VEFT",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VEFT/Assignment10.git"
+  },
+  "author": "danielb13 and jorundur13",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/VEFT/Assignment10/issues"
+  },
+  "homepage": "https://github.com/VEFT/Assignment10#readme"
+}
