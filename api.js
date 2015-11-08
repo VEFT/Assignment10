@@ -198,7 +198,6 @@ api.delete('/companies/:id', (req, res) => {
     const token = req.header('ADMIN_TOKEN');
     const requestType = req.get('Content-Type');
     const id = req.params.id;
-    console.log('id:', id);
 
     models.Company.findOne({ _id : id }, (err, docs) => {
         if(err) {
@@ -211,7 +210,6 @@ api.delete('/companies/:id', (req, res) => {
             } else if(!requestType || requestType !== APPLICATION_JSON) {
                 res.status(415).send(UNSUPPORTED_MEDIA_TYPE_ERROR_MESSAGE);
             } else {
-
                 models.Company.remove({ _id: id }, function(err) {
                     if(err) {
                         res.status(500).send(err.name);
@@ -234,11 +232,14 @@ api.delete('/companies/:id', (req, res) => {
     });
 });
 
-/* Rassgat
- */
-//api.post('/companies/:id', bodyParser.json(), (req, res) => {
-api.post('/companies/search', bodyParser.json(), (req, res) => {
+api.post('/companies/lol', bodyParser.json(), (req, res) => {
     console.log('flot');
+});
+
+/* This endpoint can be used to search for a given company that has been added to Punchy.
+ * The search should be placed by into the request body.
+ */
+api.post('/search', bodyParser.json(), (req, res) => {
     const search_string = req.body.search;
     console.log('searchstring:', search_string);
 
