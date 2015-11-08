@@ -127,6 +127,37 @@ api.post('/companies', bodyParser.json(), (req, res) => {
     });
 });
 
+/* This endpoint can be used to search for a given company that has been added to Punchy.
+ * The search should be placed by into the request body.
+ */
+api.post('/companies/search', bodyParser.json(), (req, res) => {
+    const search_string = req.body.search;
+    console.log('searchstring:', search_string);
+
+    const promise = client.search({
+        'index': 'companies',
+        'type': 'company',
+        'body': {
+            'query': {
+                'bool': {
+                    'should': [
+                        { 'term': { 'title': search_string } },
+                        { 'term': { 'description': search_string } },
+                        { 'term': { 'url': search_string } }
+                    ]
+                }
+            },
+            'sort': { 'title': 'asc' }
+        }
+    });
+
+    promise.then((doc) => {
+        res.status(200).send(doc.hits.hits.map((val) => { val._source.created = undefined; return val; }));
+    }, (err) => {
+        res.status(500).send(err.name);
+    });
+});
+
 /* Method that takes id as a parameter and updates the company with
  * the given id. The company object is passed in the request body.
  * If the company is not found a 404 status code is returned.
@@ -238,36 +269,5 @@ api.post('/companies/search', bodyParser.json(), (req, res) => {
     res.status(200).send();
 });
 */
-
-/* This endpoint can be used to search for a given company that has been added to Punchy.
- * The search should be placed by into the request body.
- */
-api.post('/search', bodyParser.json(), (req, res) => {
-    const search_string = req.body.search;
-    console.log('searchstring:', search_string);
-
-    const promise = client.search({
-        'index': 'companies',
-        'type': 'company',
-        'body': {
-            'query': {
-                'bool': {
-                    'should': [
-                        { 'term': { 'title': search_string } },
-                        { 'term': { 'description': search_string } },
-                        { 'term': { 'url': search_string } }
-                    ]
-                }
-            },
-            'sort': { 'title': 'asc' }
-        }
-    });
-
-    promise.then((doc) => {
-        res.status(200).send(doc.hits.hits.map((val) => { val._source.created = undefined; return val; }));
-    }, (err) => {
-        res.status(500).send(err.name);
-    });
-});
 
 module.exports = api;
