@@ -234,8 +234,7 @@ api.delete('/companies/:id', (req, res) => {
 
 /*
  */
-api.post('/companies/search', bodyParser.json(), (req, res) => {
-    console.log('flot');
+api.post('/search', bodyParser.json(), (req, res) => {
     const search_string = req.body.search;
     console.log('searchstring:', search_string);
 
