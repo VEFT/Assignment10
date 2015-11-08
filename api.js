@@ -33,10 +33,10 @@ api.get('/companies', (req, res) => {
         'index': 'companies',
         'type': 'company',
         'size': max,
-        'from': page
-        //'sort': { 'title' : 'asc' }
-        //'sort': { 'title': { 'order': 'desc' }}
-        //'sort': 'title'
+        'from': page,
+        'body': {
+            'sort': { 'title': 'asc' }
+        }
     });
 
     promise.then((doc) => {
