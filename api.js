@@ -32,8 +32,8 @@ api.get('/companies', (req, res) => {
     const promise = client.search({
         'index': 'companies',
         'type': 'company',
-        'size': max,
         'from': page,
+        'size': max,
         'body': {
             'sort': { 'title': 'asc' }
         }
