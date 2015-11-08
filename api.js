@@ -232,7 +232,12 @@ api.delete('/companies/:id', (req, res) => {
     });
 });
 
-/*
+api.post('/companies/lol', bodyParser.json(), (req, res) => {
+    console.log('flot');
+});
+
+/* This endpoint can be used to search for a given company that has been added to Punchy.
+ * The search should be placed by into the request body.
  */
 api.post('/search', bodyParser.json(), (req, res) => {
     const search_string = req.body.search;
