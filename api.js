@@ -257,7 +257,8 @@ api.post('/search', bodyParser.json(), (req, res) => {
                         { 'term': { 'url': search_string } }
                     ]
                 }
-            }
+            },
+            'sort': { 'title': 'asc' }
         }
     });
 
